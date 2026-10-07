@@ -1,8 +1,7 @@
 package dev.tabletop
 
 import android.app.Application
-import android.content.Context
-import androidx.datastore.preferences.preferencesDataStore
+import androidx.datastore.preferences.preferencesDataStoreFile
 import dev.tabletop.feedback.AndroidFeedback
 import dev.tabletop.game.DataStoreKeyValueStore
 import dev.tabletop.game.GLOBAL_SETTINGS_KEY
@@ -10,10 +9,12 @@ import dev.tabletop.game.GameServices
 import dev.tabletop.game.GlobalSettings
 import dev.tabletop.game.StatsRepository
 import dev.tabletop.game.observeJson
+import dev.tabletop.game.tabletopDataStore
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
-
-private val Context.dataStore by preferencesDataStore("tabletop")
 
 class TabletopApplication : Application() {
     lateinit var services: GameServices
@@ -21,6 +22,7 @@ class TabletopApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        val dataStore = tabletopDataStore(CoroutineScope(Dispatchers.IO + SupervisorJob())) { preferencesDataStoreFile("tabletop") }
         val store = DataStoreKeyValueStore(dataStore)
         val feedback = AndroidFeedback(this)
         services = GameServices(store, feedback, StatsRepository(store))

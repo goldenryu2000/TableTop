@@ -7,6 +7,7 @@ import dev.tabletop.game.GameServices
 import dev.tabletop.game.GameStats
 import dev.tabletop.game.readJson
 import dev.tabletop.game.saveKey
+import dev.tabletop.game.TabletopJson
 import dev.tabletop.game.writeJson
 import dev.tabletop.klondike.engine.DrawMode
 import dev.tabletop.klondike.engine.GameState
@@ -16,6 +17,8 @@ import dev.tabletop.klondike.engine.Session
 import dev.tabletop.klondike.engine.autoCompleteMoves
 import dev.tabletop.klondike.engine.bestMoveFor
 import dev.tabletop.klondike.engine.hint
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,6 +28,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlin.random.Random
 
@@ -57,6 +61,7 @@ data class KlondikeUiState(
 class KlondikeViewModel(
     private val services: GameServices,
     private val newSeed: () -> Long = { Random.nextLong() },
+    private val encodeDispatcher: CoroutineDispatcher = Dispatchers.Default,
 ) : ViewModel() {
     private val _ui = MutableStateFlow<KlondikeUiState?>(null)
     val ui: StateFlow<KlondikeUiState?> = _ui.asStateFlow()
@@ -80,42 +85,44 @@ class KlondikeViewModel(
         }
     }
 
-    /** Current state, or null while loading or auto-finishing (input is ignored then). */
+    /** Current state, or null while loading or auto-finishing. */
     private val ready: KlondikeUiState? get() = _ui.value?.takeIf { !it.autoFinishing }
+
+    /** Like [ready], but also null once the game is won: the table no longer takes moves. */
+    private val playable: KlondikeUiState? get() = ready?.takeIf { !it.state.isWon }
 
     fun onDraw() {
         if (play(Move.Draw)) services.feedback.play(FeedbackEvent.Draw)
     }
 
     fun onTapCard(from: Pile, count: Int) {
-        val ui = ready ?: return
+        val ui = playable ?: return
         if (!ui.settings.tapToMove) return
         val move = ui.state.bestMoveFor(from, count)
         if (move == null) services.feedback.play(FeedbackEvent.Invalid) else play(move)
     }
 
     fun onPickup() {
-        if (ready != null) services.feedback.play(FeedbackEvent.Pickup)
+        if (playable != null) services.feedback.play(FeedbackEvent.Pickup)
     }
 
     /** Tries each candidate in order; returns whether the cards moved. */
     fun onDrop(from: Pile, count: Int, candidates: List<Pile>): Boolean {
-        if (ready == null || candidates.isEmpty()) return false
+        if (playable == null || candidates.isEmpty()) return false
         val moved = candidates.any { to -> play(Move.Transfer(from, to, count)) }
         if (!moved) services.feedback.play(FeedbackEvent.Invalid)
         return moved
     }
 
     fun onUndo() {
-        val ui = ready ?: return
-        if (ui.state.isWon) return
+        val ui = playable ?: return
         val previous = ui.session.undo() ?: return
         commit(ui.copy(session = previous, hint = null))
         services.feedback.play(FeedbackEvent.Place)
     }
 
     fun onHint() {
-        val ui = ready ?: return
+        val ui = playable ?: return
         _ui.value = ui.copy(hint = ui.state.hint())
     }
 
@@ -132,7 +139,7 @@ class KlondikeViewModel(
     }
 
     fun onAutoFinish() {
-        val ui = ready ?: return
+        val ui = playable ?: return
         val moves = ui.state.autoCompleteMoves()
         if (moves.isEmpty()) return
         _ui.value = ui.copy(autoFinishing = true, hint = null)
@@ -161,7 +168,7 @@ class KlondikeViewModel(
         }
     }
 
-    private fun play(move: Move): Boolean = ready != null && applyMove(move)
+    private fun play(move: Move): Boolean = playable != null && applyMove(move)
 
     /** Applies [move] even during auto-finish; plays feedback and handles stats and the win. */
     private fun applyMove(move: Move): Boolean {
@@ -198,7 +205,10 @@ class KlondikeViewModel(
     private suspend fun save() {
         val ui = _ui.value ?: return
         val keep = ui.state.moves > 0 && !ui.state.isWon
-        services.store.writeJson(saveKey(KLONDIKE_ID), if (keep) SavedGame(ui.session, counted) else null)
+        val saved = if (keep) SavedGame(ui.session, counted) else null
+        // The undo history makes this large; keep the encoding off the main thread.
+        val json = saved?.let { withContext(encodeDispatcher) { TabletopJson.encodeToString(SavedGame.serializer(), it) } }
+        services.store.write(saveKey(KLONDIKE_ID), json)
     }
 
     private fun updateTimer() {

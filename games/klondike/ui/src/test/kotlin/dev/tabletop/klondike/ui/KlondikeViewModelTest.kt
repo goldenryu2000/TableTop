@@ -37,7 +37,7 @@ class KlondikeViewModelTest {
     private val store = InMemoryKeyValueStore()
     private val feedback = RecordingFeedback()
     private val stats = StatsRepository(store)
-    private fun vm() = KlondikeViewModel(GameServices(store, feedback, stats), newSeed = { 11L })
+    private fun vm() = KlondikeViewModel(GameServices(store, feedback, stats), newSeed = { 11L }, encodeDispatcher = Dispatchers.Main)
     private suspend fun savedRaw() = store.observe(saveKey(KLONDIKE_ID)).first()
 
     /** Everything on foundations except K♠, which sits alone in column 0. */
@@ -162,5 +162,18 @@ class KlondikeViewModelTest {
         assertEquals(DrawMode.ONE, vm.ui.value!!.state.drawMode)
         vm.onNewGame()
         assertEquals(DrawMode.THREE, vm.ui.value!!.state.drawMode)
+    }
+
+    @Test fun inputAfterWinIsIgnored() = runTest {
+        store.write(saveKey(KLONDIKE_ID), TabletopJson.encodeToString(SavedGame.serializer(), SavedGame(Session(oneMoveFromWin), counted = true)))
+        val vm = vm()
+        vm.onTapCard(Pile.Tableau(0), 1)
+        advanceTimeBy(SAVE_DEBOUNCE_MS + 1); runCurrent()
+        vm.onTapCard(Pile.Foundation(Suit.SPADES), 1)
+        assertFalse(vm.onDrop(Pile.Foundation(Suit.HEARTS), 1, listOf(Pile.Tableau(1))))
+        vm.onUndo()
+        advanceTimeBy(SAVE_DEBOUNCE_MS + 1); runCurrent()
+        assertTrue(vm.ui.value!!.state.isWon)
+        assertEquals(1, stats.observe(KLONDIKE_ID).first().won)
     }
 }

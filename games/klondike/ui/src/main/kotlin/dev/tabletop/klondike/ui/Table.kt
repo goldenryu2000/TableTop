@@ -116,6 +116,7 @@ internal fun Table(ui: KlondikeUiState, viewModel: KlondikeViewModel, modifier: 
                 .zIndex(10_000f)
                 .pointerInput(Unit) {
                     detectTapGestures { pos ->
+                        if (!currentUi.acceptsInput) return@detectTapGestures
                         val l = currentLayout
                         if (l.stock.contains(pos)) {
                             viewModel.onDraw()
@@ -130,6 +131,7 @@ internal fun Table(ui: KlondikeUiState, viewModel: KlondikeViewModel, modifier: 
                 .pointerInput(Unit) {
                     detectDragGestures(
                         onDragStart = { pos ->
+                            if (!currentUi.acceptsInput) return@detectDragGestures
                             val p = currentLayout.cardAt(pos)?.takeIf { it.faceUp } ?: return@detectDragGestures
                             val pile = p.pile ?: return@detectDragGestures
                             val count = pickCount(currentUi, pile, p.index) ?: return@detectDragGestures
@@ -157,6 +159,8 @@ internal fun Table(ui: KlondikeUiState, viewModel: KlondikeViewModel, modifier: 
         )
     }
 }
+
+private val KlondikeUiState.acceptsInput: Boolean get() = !autoFinishing && !state.isWon
 
 /** How many cards a touch at [index] of [pile] picks up, or null if that card cannot be picked up. */
 private fun pickCount(ui: KlondikeUiState, pile: Pile, index: Int): Int? = when (pile) {

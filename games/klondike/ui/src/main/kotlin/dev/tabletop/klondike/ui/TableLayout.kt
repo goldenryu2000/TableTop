@@ -45,11 +45,15 @@ class TableLayout(
 }
 
 fun computeLayout(state: GameState, width: Float, height: Float, gap: Float, leftHanded: Boolean): TableLayout {
-    val cardW = (width - gap * 8) / 7
+    // Fit seven columns across, but on short tables (landscape) let height decide so a column always fits.
+    val byWidth = (width - gap * 8) / 7
+    val byHeight = (height - gap * 4.5f) / 2.6f * CARD_ASPECT
+    val cardW = minOf(byWidth, byHeight).coerceAtLeast(1f)
     val cardH = cardW / CARD_ASPECT
     val size = Size(cardW, cardH)
+    val inset = (width - (cardW * 7 + gap * 8)) / 2
     fun x(column: Int): Float {
-        val left = gap + column * (cardW + gap)
+        val left = inset + gap + column * (cardW + gap)
         return if (leftHanded) width - left - cardW else left
     }
     val top = gap
@@ -81,7 +85,7 @@ fun computeLayout(state: GameState, width: Float, height: Float, gap: Float, lef
     val upStep = cardH * 0.27f
     state.tableau.forEachIndexed { p, pile ->
         val natural = pile.dropLast(1).sumOf { (if (it.faceUp) upStep else downStep).toDouble() }.toFloat()
-        val scale = if (natural > 0f && natural + cardH > available) ((available - cardH) / natural).coerceIn(0.05f, 1f) else 1f
+        val scale = if (natural > 0f && natural + cardH > available) ((available - cardH) / natural).coerceIn(0f, 1f) else 1f
         var y = tableauTop
         pile.forEachIndexed { i, tc ->
             cards += CardPlacement(tc.card, tc.faceUp, Pile.Tableau(p), i, Offset(x(p), y), z++)

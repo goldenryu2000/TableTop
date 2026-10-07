@@ -67,4 +67,17 @@ class TableLayoutTest {
         val dragged = Rect(Offset(col2.left + l.cardSize.width * 0.3f, col2.top + 50f), l.cardSize)
         assertEquals(listOf(Pile.Tableau(2), Pile.Tableau(3)), l.dropCandidates(dragged))
     }
+
+    @Test fun landscapeKeepsEveryCardOnScreen() {
+        val big = deal.tableau[6].take(6).map { it.copy(faceUp = false) } +
+            Rank.entries.reversed().mapIndexed { i, r -> TableauCard(Card(if (i % 2 == 0) Suit.SPADES else Suit.HEARTS, r), true) }
+        val s = deal.copy(tableau = deal.tableau.toMutableList().also { it[6] = big })
+        val width = 2270f
+        val height = 760f
+        val l = computeLayout(s, width, height, 12f, false)
+        l.cards.forEach { p ->
+            assertTrue("${p.card} bottom ${p.topLeft.y + l.cardSize.height} > $height", p.topLeft.y + l.cardSize.height <= height + 0.01f)
+            assertTrue("${p.card} off the side", p.topLeft.x >= 0f && p.topLeft.x + l.cardSize.width <= width)
+        }
+    }
 }
