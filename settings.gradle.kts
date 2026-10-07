@@ -17,3 +17,4 @@ rootProject.name = "tabletop"
 include(":app")
 include(":core:cards-model", ":games:klondike:engine")
 include(":core:feedback")
+include(":core:game-api")
