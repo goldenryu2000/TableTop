@@ -37,6 +37,7 @@ import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -234,7 +235,13 @@ private fun ToggleRow(title: String, subtitle: String, checked: Boolean, onToggl
     ListItem(
         headlineContent = { Text(title) },
         supportingContent = { Text(subtitle) },
-        trailingContent = { Switch(checked = checked, onCheckedChange = onToggle) },
+        trailingContent = {
+            Switch(
+                checked = checked,
+                onCheckedChange = onToggle,
+                colors = SwitchDefaults.colors(checkedTrackColor = KlondikeColors.accent, checkedThumbColor = KlondikeColors.tableEdge),
+            )
+        },
         colors = ListItemDefaults.colors(
             containerColor = KlondikeColors.sheet,
             headlineColor = KlondikeColors.ink,

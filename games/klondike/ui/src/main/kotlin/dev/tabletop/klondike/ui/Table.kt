@@ -40,6 +40,7 @@ import dev.tabletop.cards.Card
 import dev.tabletop.cards.ui.CardSlot
 import dev.tabletop.cards.ui.CardStyle
 import dev.tabletop.cards.ui.PlayingCard
+import dev.tabletop.cards.ui.glyph
 import dev.tabletop.design.Motion
 import dev.tabletop.design.rememberReducedMotion
 import dev.tabletop.klondike.engine.Move
@@ -74,7 +75,7 @@ internal fun Table(ui: KlondikeUiState, viewModel: KlondikeViewModel, modifier: 
         CardSlot(if (state.waste.isNotEmpty()) "↻" else null, KlondikeColors.ink, layout.stock.place().testTag("stock"))
         layout.piles.forEach { (pile, rect) ->
             when (pile) {
-                is Pile.Foundation -> CardSlot(pile.suit.symbol, KlondikeColors.ink, rect.place())
+                is Pile.Foundation -> CardSlot(glyph(pile.suit), KlondikeColors.ink, rect.place())
                 is Pile.Tableau -> CardSlot("K", KlondikeColors.ink, Rect(rect.topLeft + Offset(gap / 2, 0f), layout.cardSize).place())
                 Pile.Waste -> Unit
             }

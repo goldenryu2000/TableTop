@@ -18,4 +18,8 @@ class CardStyleTest {
         assertEquals(s.diamonds, s.colorOf(Suit.DIAMONDS))
         assertEquals(s.clubs, s.colorOf(Suit.CLUBS))
     }
+
+    @Test fun suitGlyphsForceTextPresentation() {
+        Suit.entries.forEach { assertEquals(it.symbol + "\uFE0E", glyph(it)) }
+    }
 }

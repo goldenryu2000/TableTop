@@ -54,6 +54,9 @@ data class CardStyle(
     }
 }
 
+/** Suit symbol with the text variation selector, so fonts never swap in a color emoji. */
+fun glyph(suit: Suit): String = suit.symbol + "\uFE0E"
+
 private fun cornerFor(width: Dp) = RoundedCornerShape(width * 0.09f)
 
 /** A card that flips with a 3D turn when [faceUp] changes. */
@@ -81,7 +84,7 @@ private fun CardFace(card: Card, style: CardStyle, width: Dp) {
     val isFace = card.rank.value > 10
     val (rankSize, suitSize, centerSize, tracking) = with(LocalDensity.current) {
         val w = width.toPx()
-        listOf(w * 0.30f, w * 0.24f, w * if (isFace) 0.46f else 0.52f, -w * 0.02f).map { it.toSp() }
+        listOf(w * 0.30f, w * 0.30f, w * if (isFace) 0.46f else 0.66f, -w * 0.02f).map { it.toSp() }
     }
     Box(
         Modifier
@@ -98,10 +101,10 @@ private fun CardFace(card: Card, style: CardStyle, width: Dp) {
                 card.rank.label,
                 style = TextStyle(color = color, fontSize = rankSize, fontWeight = FontWeight.SemiBold, letterSpacing = tracking),
             )
-            Text(card.suit.symbol, style = TextStyle(color = color, fontSize = suitSize))
+            Text(glyph(card.suit), style = TextStyle(color = color, fontSize = suitSize))
         }
         Text(
-            if (isFace) card.rank.label else card.suit.symbol,
+            if (isFace) card.rank.label else glyph(card.suit),
             modifier = Modifier.align(Alignment.Center).padding(top = width * 0.28f),
             style = TextStyle(
                 color = color.copy(alpha = if (isFace) 0.9f else 1f),
