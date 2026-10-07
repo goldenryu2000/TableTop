@@ -33,9 +33,11 @@ android {
 kotlin { jvmToolchain(21) }
 
 dependencies {
-    implementation(platform(libs.compose.bom))
-    implementation(libs.androidx.core.ktx)
+    implementation(project(":core:design"))
+    implementation(project(":core:game-api"))
+    implementation(project(":games:klondike:ui"))
     implementation(libs.androidx.activity.compose)
-    implementation(libs.compose.ui)
-    implementation(libs.compose.material3)
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.lifecycle.runtime.compose)
+    debugImplementation(libs.compose.ui.tooling)
 }
