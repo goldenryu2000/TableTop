@@ -1,0 +1,5 @@
+<resources>
+    <style name="Theme.Tabletop" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">#FF1F3B33</item>
+    </style>
+</resources>
