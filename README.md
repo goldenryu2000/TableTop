@@ -12,6 +12,10 @@ Requires JDK 21 and the Android SDK.
 
     ./gradlew assembleDebug
 
+Release builds are signed when `keystore.properties` exists (see `app/build.gradle.kts`).
+
+    ./gradlew assembleRelease
+
 ## License
 
 GPL-3.0
