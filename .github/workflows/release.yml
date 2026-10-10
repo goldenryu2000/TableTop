@@ -22,8 +22,6 @@ jobs:
         with:
           distribution: temurin
           java-version: 21
-      - uses: android-actions/setup-android@v3
-        if: env.KEYSTORE_BASE64 != ''
       - uses: gradle/actions/setup-gradle@v4
         if: env.KEYSTORE_BASE64 != ''
       - name: Write signing config
