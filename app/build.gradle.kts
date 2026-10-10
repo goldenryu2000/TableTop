@@ -19,8 +19,8 @@ android {
         applicationId = "dev.tabletop"
         minSdk = 26
         targetSdk = 36
-        versionCode = 2
-        versionName = "0.2.0"
+        versionCode = 3
+        versionName = "0.3.0"
     }
 
     signingConfigs {
@@ -56,6 +56,7 @@ dependencies {
     implementation(project(":core:game-api"))
     implementation(project(":games:klondike:ui"))
     implementation(project(":games:mancala:ui"))
+    implementation(project(":games:spider:ui"))
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)

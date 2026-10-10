@@ -18,7 +18,7 @@ kotlin { jvmToolchain(21) }
 dependencies {
     api(project(":games:klondike:engine"))
     api(project(":core:game-api"))
-    api(project(":core:cards-ui"))
+    api(project(":core:solitaire-ui"))
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     testImplementation(libs.junit)
