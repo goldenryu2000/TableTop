@@ -23,6 +23,13 @@ class GameStatsTest {
         assertEquals(0.5f, s.winRate)
     }
 
+    @Test fun untimedWinKeepsNoBestTime() {
+        val s = GameStats().recordStart().recordWin(timeMs = null, score = 8)
+        assertEquals(null, s.bestTimeMs)
+        assertEquals(8, s.bestScore)
+        assertEquals(1, s.currentStreak)
+    }
+
     @Test fun winRateWithNoGames() {
         assertEquals(0f, GameStats().winRate)
     }

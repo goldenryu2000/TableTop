@@ -76,9 +76,11 @@ private fun StatsCard(game: GameEntry, s: GameStats, onReset: suspend () -> Unit
             StatRow("Played" to s.played.toString(), "Won" to s.won.toString(), "Win rate" to "${(s.winRate * 100).toInt()}%")
             Spacer(Modifier.height(12.dp))
             StatRow(
-                "Best time" to (s.bestTimeMs?.let(::formatTime) ?: "-"),
-                "Best score" to (s.bestScore?.toString() ?: "-"),
-                "Streak" to "${s.currentStreak} / ${s.bestStreak}",
+                *listOfNotNull(
+                    if (game.timed) "Best time" to (s.bestTimeMs?.let(::formatTime) ?: "-") else null,
+                    game.scoreLabel to (s.bestScore?.toString() ?: "-"),
+                    "Streak" to "${s.currentStreak} / ${s.bestStreak}",
+                ).toTypedArray(),
             )
             Spacer(Modifier.height(8.dp))
             TextButton(onClick = { confirm = true }) { Text("Reset", color = game.palette.onBackground.copy(alpha = 0.7f)) }

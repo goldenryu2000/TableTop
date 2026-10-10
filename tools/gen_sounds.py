@@ -66,6 +66,10 @@ def main():
                             (0.03, tone(1318.5, 0.4), 0.45)), peak=0.16)
     write("invalid", tone(230, 0.14, glide=-0.2, power=3, harmonics=((1, 1.0), (2, 0.2))), peak=0.14)
     write("deal", mix(*[(k * 0.055, noise(0.05, cutoff=0.3, power=3, seed=10 + k), 1.0) for k in range(7)]), peak=0.1)
+    # A pebble dropped into a wooden pit: a bright click over a short hollow knock.
+    write("stone", mix((0, noise(0.025, cutoff=0.6, attack=0.001, power=6, seed=20), 0.8),
+                       (0, tone(1900, 0.05, attack=0.001, power=6), 0.35),
+                       (0, tone(420, 0.08, attack=0.002, power=5), 0.5)), peak=0.13)
     notes = [523.25, 659.25, 783.99, 1046.5]
     write("win", mix(*[(k * 0.14, tone(f, 0.9, harmonics=((1, 1.0), (2, 0.12))), 1.0) for k, f in enumerate(notes)]), peak=0.18)
 

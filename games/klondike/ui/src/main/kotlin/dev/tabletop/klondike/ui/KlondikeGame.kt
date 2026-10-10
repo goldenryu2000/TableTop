@@ -44,9 +44,10 @@ object KlondikeGame {
                 }
             }
         },
-        content = { services, onExit ->
+        tutorial = KlondikeTutorial,
+        content = { services, onExit, onHowToPlay ->
             val vm = viewModel { KlondikeViewModel(services) }
-            KlondikeScreen(vm, onExit)
+            KlondikeScreen(vm, onExit, onHowToPlay)
         },
     )
 }

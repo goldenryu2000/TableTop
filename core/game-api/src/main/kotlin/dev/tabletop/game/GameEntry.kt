@@ -20,12 +20,28 @@ data class GamePalette(val background: Color, val surface: Color, val accent: Co
 
 class GameServices(val store: KeyValueStore, val feedback: Feedback, val stats: StatsRepository)
 
-/** How a game plugs into the shell. */
+/** Key that is present once a game's tutorial has been shown. */
+fun tutorialSeenKey(gameId: String) = "tutorial_seen_$gameId"
+
+/** One page of a game's "How to play" guide. */
+class TutorialPage(
+    val title: String,
+    val body: String,
+    val illustration: @Composable (Modifier) -> Unit,
+)
+
+/**
+ * How a game plugs into the shell. [content] gets `onHowToPlay` for its help button.
+ * [scoreLabel] names `GameStats.bestScore` on the stats screen; [timed] games also show a best time.
+ */
 class GameEntry(
     val id: String,
     val title: String,
     val tagline: String,
     val palette: GamePalette,
     val illustration: @Composable (Modifier) -> Unit,
-    val content: @Composable (services: GameServices, onExit: () -> Unit) -> Unit,
+    val tutorial: List<TutorialPage>,
+    val scoreLabel: String = "Best score",
+    val timed: Boolean = true,
+    val content: @Composable (services: GameServices, onExit: () -> Unit, onHowToPlay: () -> Unit) -> Unit,
 )

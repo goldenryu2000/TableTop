@@ -8,7 +8,7 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
 
-enum class FeedbackEvent { Pickup, Place, Flip, Draw, Foundation, Invalid, Deal, Win }
+enum class FeedbackEvent { Pickup, Place, Flip, Draw, Foundation, Invalid, Deal, Win, Stone }
 
 interface Feedback {
     fun play(event: FeedbackEvent)
@@ -42,6 +42,7 @@ class AndroidFeedback(context: Context) : Feedback {
         FeedbackEvent.Invalid to R.raw.invalid,
         FeedbackEvent.Deal to R.raw.deal,
         FeedbackEvent.Win to R.raw.win,
+        FeedbackEvent.Stone to R.raw.stone,
     ).mapValues { (_, res) -> pool.load(context, res, 1) }
 
     private val vibrator: Vibrator? = if (Build.VERSION.SDK_INT >= 31) {
@@ -60,7 +61,7 @@ class AndroidFeedback(context: Context) : Feedback {
         val v = vibrator?.takeIf { it.hasVibrator() } ?: return
         val effect = if (Build.VERSION.SDK_INT >= 29) {
             when (event) {
-                FeedbackEvent.Pickup, FeedbackEvent.Draw -> VibrationEffect.EFFECT_TICK
+                FeedbackEvent.Pickup, FeedbackEvent.Draw, FeedbackEvent.Stone -> VibrationEffect.EFFECT_TICK
                 FeedbackEvent.Place, FeedbackEvent.Foundation -> VibrationEffect.EFFECT_CLICK
                 FeedbackEvent.Invalid -> VibrationEffect.EFFECT_DOUBLE_CLICK
                 FeedbackEvent.Win -> VibrationEffect.EFFECT_HEAVY_CLICK
@@ -68,7 +69,7 @@ class AndroidFeedback(context: Context) : Feedback {
             }.let(VibrationEffect::createPredefined)
         } else {
             val ms = when (event) {
-                FeedbackEvent.Pickup, FeedbackEvent.Draw -> 8L
+                FeedbackEvent.Pickup, FeedbackEvent.Draw, FeedbackEvent.Stone -> 8L
                 FeedbackEvent.Place, FeedbackEvent.Foundation -> 14L
                 FeedbackEvent.Invalid -> 30L
                 FeedbackEvent.Win -> 40L

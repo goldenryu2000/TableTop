@@ -16,11 +16,12 @@ data class GameStats(
 
     fun recordStart() = copy(played = played + 1)
 
-    fun recordWin(timeMs: Long, score: Int): GameStats {
+    /** [timeMs] is null for games without a clock. */
+    fun recordWin(timeMs: Long?, score: Int): GameStats {
         val streak = currentStreak + 1
         return copy(
             won = won + 1,
-            bestTimeMs = minOf(bestTimeMs ?: timeMs, timeMs),
+            bestTimeMs = if (timeMs == null) bestTimeMs else minOf(bestTimeMs ?: timeMs, timeMs),
             bestScore = maxOf(bestScore ?: score, score),
             currentStreak = streak,
             bestStreak = maxOf(bestStreak, streak),

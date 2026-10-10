@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.automirrored.rounded.HelpOutline
 import androidx.compose.material.icons.automirrored.rounded.Undo
 import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material.icons.rounded.Lightbulb
@@ -63,7 +64,7 @@ import dev.tabletop.klondike.engine.canAutoComplete
 import kotlinx.coroutines.delay
 
 @Composable
-fun KlondikeScreen(viewModel: KlondikeViewModel, onExit: () -> Unit) {
+fun KlondikeScreen(viewModel: KlondikeViewModel, onExit: () -> Unit, onHowToPlay: () -> Unit = {}) {
     val ui by viewModel.ui.collectAsStateWithLifecycle()
     val stats by viewModel.stats.collectAsStateWithLifecycle()
     LifecycleResumeEffect(viewModel) {
@@ -90,7 +91,7 @@ fun KlondikeScreen(viewModel: KlondikeViewModel, onExit: () -> Unit) {
         val current = ui ?: return@Box
         val state = current.state
         Column(Modifier.fillMaxSize().safeDrawingPadding()) {
-            TopBar(current, onExit = onExit, onSettings = { showSettings = true })
+            TopBar(current, onExit = onExit, onHowToPlay = onHowToPlay, onSettings = { showSettings = true })
             Table(current, viewModel, Modifier.weight(1f).padding(horizontal = 2.dp))
             BottomBar(
                 current,
@@ -119,7 +120,7 @@ fun KlondikeScreen(viewModel: KlondikeViewModel, onExit: () -> Unit) {
 }
 
 @Composable
-private fun TopBar(ui: KlondikeUiState, onExit: () -> Unit, onSettings: () -> Unit) {
+private fun TopBar(ui: KlondikeUiState, onExit: () -> Unit, onHowToPlay: () -> Unit, onSettings: () -> Unit) {
     val s = ui.state
     Row(
         Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 4.dp),
@@ -132,6 +133,9 @@ private fun TopBar(ui: KlondikeUiState, onExit: () -> Unit, onSettings: () -> Un
             StatLabel("Time", formatTime(s.elapsedMs), KlondikeColors.ink)
             StatLabel("Moves", s.moves.toString(), KlondikeColors.ink, Modifier.testTag("moves"))
             StatLabel("Score", s.score.toString(), KlondikeColors.ink)
+        }
+        IconButton(onClick = onHowToPlay) {
+            Icon(Icons.AutoMirrored.Rounded.HelpOutline, contentDescription = "How to play", tint = KlondikeColors.ink)
         }
         IconButton(onClick = onSettings) {
             Icon(Icons.Rounded.Tune, contentDescription = "Game settings", tint = KlondikeColors.ink)

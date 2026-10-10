@@ -7,6 +7,9 @@ Download the APK from [Releases](https://github.com/goldenryu2000/TableTop/relea
 ## Games
 
 - **Klondike**: classic solitaire with draw 1 or 3, unlimited undo, hints and auto-finish.
+- **Mancala**: Kalah on a wooden board, against the computer (Easy, Medium, Hard) or a friend on the same phone.
+
+Every game has an illustrated "How to play" guide, shown on your first visit and behind the `?` button.
 
 ## Build
 
